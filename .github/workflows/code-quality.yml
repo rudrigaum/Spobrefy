@@ -83,7 +83,6 @@ jobs:
             }
             
             const comment = `## Code Quality Report 📊
-
 | Tool | Status |
 |------|--------|
 | Detekt | ${detektStatus} |
