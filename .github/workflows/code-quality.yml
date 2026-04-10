@@ -63,45 +63,6 @@ jobs:
           name: detekt-report
           path: build/reports/detekt/
 
-      - name: Comment PR with quality gate status
-        if: always() && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let detektStatus = '❌';
-            let sonarStatus = '❓';
-            
-            try {
-              if (fs.existsSync('build/reports/detekt/detekt.xml')) {
-                const detektReport = fs.readFileSync('build/reports/detekt/detekt.xml', 'utf8');
-                const issueCount = (detektReport.match(/<issue/g) || []).length;
-                detektStatus = issueCount === 0 ? '✅' : `⚠️ (${issueCount} issues)`;
-              }
-            } catch (e) {
-              detektStatus = '❓';
-            }
-            
-            const comment = `## Code Quality Report 📊
-| Tool | Status |
-|------|--------|
-| Detekt | ${detektStatus} |
-| SonarQube | ${sonarStatus} |
-
-### 📈 Details
-- **Branch:** \`${{ github.head_ref }}\`
-- **Commit:** \`${{ github.event.pull_request.head.sha }}\`
-- **Workflow:** [View logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-
-💡 Check the [Detekt Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-
       - name: Fail if quality gate failed
         if: failure()
         run: |
