@@ -52,24 +52,3 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: ./gradlew sonarqube
         if: env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != ''
-
-      - name: Comment PR with build status
-        if: always() && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const jobStatus = '${{ job.status }}';
-            const buildLogPath = 'build/reports/detekt/detekt.html';
-            
-            let comment = `## Build Status: ${jobStatus.toUpperCase()} ✅\n\n`;
-            comment += `- **Build**: ${jobStatus}\n`;
-            comment += `- **Tests**: ${jobStatus}\n`;
-            comment += `- **Detekt**: Check details above\n`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
